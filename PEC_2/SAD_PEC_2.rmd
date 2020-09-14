@@ -1,0 +1,411 @@
+---
+title: "SAD_PEC_2"
+author: "Marc Bañuls Tornero"
+date: "13/11/2019"
+output:
+  pdf_document:
+    toc: TRUE
+  html_document:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ejercicio 1: Código de programación en R. Funciones
+
+### Lee el código fuente para cada una de las siguientes dos funciones genéricas, interpreta qué hacen y luego propón nombres mejores, más adecuados.
+
+La primera función presentada, llamada a priori f1:
+
+```{r}
+f1<- function(string, prefix) {
+  substr(string,1,nchar(prefix)) == prefix
+}
+```
+
+Esta función está hecha con la función de comprobar si una palabra tiene el mismo prefijo que el que se espera. Esto puede tener utilidad para buscar prefijos en un conjunto de palabras.
+
+```{r}
+f1(string = c("interminable","interior","contraproducente","incapaz","inimaginable","desalentado"), prefix = "in")
+```
+A primera vista esto no parece útil en exceso, pero si queremos por ejemplo cuantas palabras tienen el prefijo en un texto extenso, se puede separar el texto por palabras y mediante la función for loop y if..else podemos contar fácilmente el número de palabras con este prefijo.   
+Podemos mejorar el nombre de la función y las variables ahora que sabemos su propósito:
+
+```{r}
+detector_prefijo<- function(palabra, prefijo) {
+  substr(palabra,1,nchar(prefijo)) == prefijo
+}
+```
+También podríamos llamar a la función "buscador" o similares, ya que ésta también podría usarse para buscar palabras en un texto que empiecen por lo que hayamos definido.
+---
+La segunda función presentada, llamada a priori f2:
+
+```{r}
+f2<- function(x) {
+  if (length(x)<=1) return(NULL)
+  x[-length(x)]
+}
+```
+
+Esta función tiene la utilidad de descartar el último valor de la variable. Si la variable tan solo tiene un valor, devuelve la variable con valor nulo (NULL). Por ejemplo, podemos descartar el último valor de la lista de la compra.
+
+```{r}
+comprar<-c("aguacates", "chocolate", "cereales", "plutonio")
+f2(comprar)
+```
+Un buen nombre para la función podría ser:
+```{r}
+eliminar_ultimo<-function(x) {
+  if (length(x)<=1) return(NULL)
+  x[-length(x)]
+}
+```
+
+# Ejercicio 2: Generar funciones para estadística
+### Este ejercicio consiste en construir una función que calcule los estadísticos descriptivos básicos y un histograma de una variable continua. ¿La función sería diferente si la hacemos con una variable discreta? ¿Podríamos crear una función única para cualquier tipo de variable?   
+
+La función 'summary()' nos permite mostar un resumen de los parámetros estadísticos de un conjunto de datos, y la función 'hist()' realiza un histograma con el conjunto de datos que se de. Por lo tanto, juntando estas dos variables en una función podemos obtener lo que se pide en el enunciado. Para realizar la prueba de la función con una variable discreta y otra continua, las creamos previamente:
+
+```{r}
+discreta<-c(1,1,4,6,2,6)
+continua<-c(1.1123,1.5534,6.3324,7.2213,9.3576,5.2231)
+```
+
+Realmente las variables continuas pueden tener valores tanto enteros como decimales. La función a crear posteriormente entonces no debería verse afectada si utilizamos una variable discreta en vez de una continua en la función, ya que los valores enteros también son usados en variables continuas.   
+Igualmente, para que la función trabaje siempre con variables continuas, podemos transformar siempre la variable a variable continua en la propia función.
+
+Creamos la función:
+```{r}
+estadistico_hist<-function(x){
+  hist(as.numeric(x), main = "Histograma", xlab = "Valores", ylab = "Frecuencia")
+  summary(as.numeric(x))
+}
+```
+   
+Comprobamos la función:
+```{r}
+estadistico_hist(discreta)
+```
+
+```{r}
+estadistico_hist(continua)
+```
+
+En este ejercicio no habría una diferencia significativa entre tratar la variable como discreta o continua, ya que el histograma contaría los valores de igual manera como numéricos. En todo caso, donde mayor utilidad puede tener la función es en variables categóricas (interpretadas como factores en R) donde la función interpretaría esta variable como contínua para permitir su descripción estadística o realización del histograma de sus valores.   
+
+# Ejercicio 3: Modelo de comportamiento de Ricker
+### La siguiente función nos muestra el comportamiento de una población bajo el modelo de Ricker: $$ N_{t+1} = N_t exp [r(1 - \frac{N_t}{K})] $$   
+### Este modelo es usado ampliamente en ecología de poblaciones, particularmente en estudios demográficos de peces. El objetivo de este ejercicio es simular el modelo con respecto a la tasa de crecimiento r y el número inicial de individuos en la población $N_0$ (la capacidad de carga K es usualmente fijada en 1, y usaremos este como un valor por defecto). El tiempo (t) será igual a 100.   
+
+#### a)Debemos generar una función que nos permita mostrar los resultados de la fórmula del enunciado y una gráfica de individuos en función del tiempo.   
+
+Definimos la función en función de la población n, la tasa de crecimiento r, y la capacidad de carga k (que fijaremos en 1):
+```{r}
+ricker<- function(nt,r,k){
+  n_t_mas_1<-nt * exp(r * (1-(nt/k)))
+  return(n_t_mas_1)
+}
+```
+
+Ahora podemos utilizar esta función para representar como cambia la población inicial en las siguientes generaciones teniendo en cuenta la tasa de crecimiento r.
+```{r}
+poblacion_inicial <- seq(1, 100)
+modelo_ricker <- ricker(poblacion_inicial,r = 0.03, k = 1)
+plot(poblacion_inicial,modelo_ricker, xlab = 'poblacion_inicial (Nt)', ylab = 'Población en t+1 (Nt+1)', main = 'Modelo de Ricker R = 0.03 k = 1' )
+```
+
+Para obtener una gráfica representativa de un crecimiento poblacional dependiente de la densidad, hemos ido cambiando la tasa de crecimiento junto el número de individuos. Observamos que representando $N_{t+1}$ en función de $N_t$ en las primeras generaciones donde la población es pequeña (entre 0 y 30 individuos) se observa que la población aumentará en la próxima generación. Cuando la población se llega a tener una alta densidad de población (superior a 30 individuos) se llega al punto de equilibrio o plateau. En niveles altos de población, los mecanismos dependientes de la densidad (competencia) reducen el tamaño de la población en la siguiente generación.
+
+#### b) Existe una funión para implementar el modelo de Ricker ya implementada en R?   
+
+Investigando entre los paquetes de R hemos el paquete 'datasets v3.6.1' que contiene la función 'ricker', la cual realiza la ecuación del modelo Ricker a partir de los valores de spawners= número de individuos (N), a = parámetro de productividad (r) y b = parámetro de densidad (K). También hemos encontrado el paquete 'pomp' (siglas de Partially Observed Markov Processes)  que sirve para implementar varios modelos POMP, simularlos y tratar con sus datos. En este paquete existen varias funciones y, entre ellas, se encuentran funciones para realizar simulaciones y gráficas del modelo de ricker o interpretar los datos del modelo.
+   
+# Ejercicio 4: Aplicaciones de distribuciones de probabilidad en R
+La probabilidad que, en un hospital, el próximo nacimiento sea niño es 0.52.   
+
+#### a) Calculemos la probabilidad de que haya más de 540 niños en los próximos 1000 nacimientos
+
+Podemos definir la probabilidad de nacimiento de un niño como una distribución binomial con p = 0.52 (probabilidad de nacer niño) y q = 0.48 (probabilidad de nacer niña). Por lo tanto, podemos utilizar la función binomial de probabilidad acumulada para calcular la probabilidad (teniendo en cuenta que queremos la probabilidad de la cola derecha o 'upper tail'):
+
+```{r}
+pbinom(540, 1000, 0.52, lower.tail = FALSE)
+```
+El resultado es una probabilidad del 9.7%.   
+
+#### b) ¿Y si queremos pensar en 500 hospitales? Crea una pequeña función usando replicate() para buscar este valor.
+
+En este caso podemos simular cuantos niños nacen en 500 hospitales distintos y calcular a partir de esto la probabilidad de que haya más de 540 niños de 1000 nacimientos. Para ello utilizaremos la función replicate(). Utilizaremos la función set.seed() para obtener unos valores constantes en la función.
+```{r}
+set.seed(123)
+nacimientos_hospitales <- replicate(500, {rbinom(1, 1000, 0.52)})
+nacimientos_hospitales
+```
+
+Con estos valores podemos buscar los hospitales que tienen más de 540 niños de cada 1000 nacimientos.
+
+```{r}
+mayor_540_nacimientos <- sum(540 < nacimientos_hospitales)
+```
+
+Ahora podemos encontrar la proporción de nacimientos entre el total de hospitales para observar la probabilidad obtenida:
+
+```{r}
+probabilidad_nacimientos <- mayor_540_nacimientos / 500
+probabilidad_nacimientos
+```
+
+Observamos que este valor es similar al valor obtenido anteriormente en el apartado a), ya que la distribución utilizada en la generación de los 500 resultados es la misma en el apartado anterior. De esta manera, la repetición de los 500 valores ha dado lugar a una distribución en la que el 10% de hospitales han tenido más de 540 nacimientos de niños de un total de 1000 nacimientos en cada hospital.
+
+# Ejercicios 5 y 6: Distribuciones y cálculo de probabilidad con R o R-Commander   
+
+## Ejercicio 5:
+### En una Universidad de California se estudian un determinado tipo de aves. Se comprueba que la longitud de las alas extendidas, X, es una variable aleatoria que se distribuye aproximadamente según una curva Normal, de media 110 cm. y desviación típica 4 cm. Elegida un ave al azar y suponiendo que las longitudes se distribuyen normalmente, calcular:   
+
+#### a) La probabilidad de que la longitud de las alas esté comprendida entre 110 y 115 cm.   
+Teniendo en cuenta que se trata de una distribución normal, podemos buscar la probabilidad de que las alas sean menores a 100 y la probabilidad de que las alas sean menores a 115 cm. Entonces, la diferencia de estos dos valores resultará en la probabilidad de que la longitud de las alas se encuentre entre 100 y 115 cm. Utilizamos la función de probabilidad acumulada en una normal por la cola izquierda (lower.tail = TRUE):
+
+```{r}
+normal_110<- pnorm(110, mean = 110, sd = 4, lower.tail = TRUE)
+normal_115<- pnorm(115, mean = 110, sd = 4, lower.tail = TRUE)
+p_110_115<- normal_115 - normal_110
+p_110_115
+```
+La probabilidad de que la longitud de las alas se encuentre entre 100 y 115 cm. es del 39.4%.   
+
+#### b) La probabilidad de que la longitud de las alas sea mayor que 105 cm.   
+Al estar buscando la probabilidad de que la longitud sea mayor y no menor a 105 cm. utilizaremos la función de la probabilidad para la cola derecha (lower.tail = FALSE).
+```{r}
+normal_mayor_105<- pnorm(105, mean = 110, sd = 4, lower.tail = FALSE)
+normal_mayor_105
+```
+La probabilidad de que la longitud de las alas sea mayor a 105 cm. es del 89.4%.   
+
+#### d) La longitud mínima del 30% de las alas que más miden   
+El enunciado de este apartado se traduce a la búsqueda del percentil 30 por la cola derecha de la distribución normal, o lo que es lo mismo, el percentil 70 por la cola izquierda. Utilizamos entonces la función del cálculo de percentiles:
+
+```{r}
+percentil_70<- qnorm(0.7, mean = 110, sd = 4)
+percentil_70
+```
+La longitud mínima del 30% de las alas que más miden (o percentil 70) es de 112.09 cm.   
+
+#### e) Quince longitudes aleatorias que sigan dicha distribución
+Con la función rnorm() generamos el número de longitudes deseado con la distribución deseada introduciendo la media y desviación típica de dicha distribución:
+```{r}
+longitudes<- rnorm(15, mean = 110, sd = 4)
+longitudes
+```
+
+Para comprobar que las longitudes generadas siguen la distribución podemos medir su media y desviación típica muestral.
+```{r}
+mean(longitudes)
+sd(longitudes)
+```
+Observamos que su media y desviación se acercan significativamente a la media y desviación típica de la distribución aunque no concuerdan exactamente. A mayor cantidad de muestras generadas, más se acercaran la media y desviación típica muestrales a la de la distribución.
+
+## Ejercicio 6:
+Definid una variable aleatoria que cuente el número de supervivientes que ingresan en un Hospital con una enfermedad muy grave. Se ha determinado que produce una mortalidad del 75% en los bebés lactantes. Si en este Hospital ingresaron en un brote muy fuerte 20 lactantes con la enfermedad:   
+
+#### a) ¿Qué distribución sería la escogida para este caso? ¿Qué parámetros tendría?
+
+En este caso se escogemos una distribución binomial con una probabilidad de que el bebé lactante sobreviva p = 0.25 y el tamaño de la muestra son los 20 lactantes ingresados en el hospital con la enfermedad.   
+
+#### b) Busca la probabilidad que sobrevivan todos los pacientes. ¿Qué nos dice esta probabilidad?
+
+Utilizamos la función dbinom() para hallar la probabilidad de que 20 de los 20 niños sobrevivan.
+
+```{r}
+p_todos_bebes<- dbinom(20, size = 20, prob = 0.25)
+p_todos_bebes
+```
+Con el resultado obtenido, la probabilidad de que sobrevivan todos los pacientes es similar al 0%, por lo que podemos concluir que es prácticamente imposible que sobrevivan todos los bebés.   
+
+#### c) Busca la probabilidad de que sobrevivan la mitad de los pacientes   
+
+En este caso utilizaremos la misma función que en el apartado b) pero ahora teniendo en cuenta que queremos saber la probabilidad de que 10 de los 20 pacientes sobrevivan:
+
+```{r}
+p_mitad_bebes<- dbinom(10, size = 20, prob = 0.25)
+p_mitad_bebes
+```
+
+La probabilidad de que sobrevivan 10 de 20 pacientes es del 0.1%. Esto no indica que sea imposible que vayan a sobrevivir la mitad de los pacientes, ya que esta no es la probabilidad acumulada, si no la probabilidad de que exactamente 10 bebés sobrevivan. Si observamos la probabilidad de que sobrevivan más de la mitad de bebés enfermos:
+
+```{r}
+p_mas_mitad_bebes<- pbinom(10, size = 20, prob = 0.25, lower.tail = FALSE)
+p_mas_mitad_bebes
+```
+
+De esta manera se puede concluir que también es improbable que sobrevivan más de la mitad de los pacientes.
+
+# Ejercicio 7: ANOVA con R y RCommander:
+
+En un tratamiento contra el asma se seleccionaron 40 enfermos de características similares y ataques de asma muy frecuentes. A cada enfermo se le administró un tratamiento: P, A, B, AB, al azar, formando 4 grupos. El grupo P tomó placebo, el grupo A tomó un fármaco "A", el grupo B un fármaco "B" y el grupo AB una asociación entre "A" y "B". Para valorar la eficacia de los tratamientos, se registró el descenso de los ataques de asma desde el estado basal (inicio del tratamiento) hasta el estado al cabo de una semana de tratamiento. Los resultados, después de registrarse algunos abandonos, fueron los siguientes:   
+P: 10, 0, 15, -20, 0, 15, -5   
+A: 20, 25, 33, 25, 30, 18, 27, 0, 35, 20 
+B: 15, 10, 25, 30, 15, 35, 25, 22, 11, 25
+AB: 10, 5, -5, 15, 20, 20, 0, 10   
+
+#### a) ¿Hay diferencias entre tratamientos? (Hipótesis global)  
+
+Antes que todo debemos tener en cuenta que estos datos son independientes entre ellos.   
+
+Para observar una posible diferencia entre tratamientos primero ubicaremos los valores obtenidos en variables (añadiendo valores NA para los que dejaron el tratamiento) para posteriormente definir el conjunto de todos los datos en un data frame:
+```{r}
+P<- c(10, 0, 15, -20, 0, 15, -5, NA, NA, NA)
+A<- c(20, 25, 33, 25, 30, 18, 27, 0, 35, 20)
+B<- c(15, 10, 25, 30, 15, 35, 25, 22, 11, 25)
+AB<- c(10, 5, -5, 15, 20, 20, 0, 10, NA, NA)
+tratamientos<- data.frame(P, A, B, AB)
+head(tratamientos)
+```
+
+Ahora que tenemos el dataframe, podemos apilar todos los valores con su nombre de grupo para poder interpretar los tipos de tratamiento como factores para facilitar los posteriores tratamientos. También definimos cada columna como una variable:
+```{r}
+estudio<-stack(tratamientos)
+estudio$ind<-factor(estudio$ind)
+farmacos<-estudio$ind
+valores<-estudio$values
+```
+
+Calculamos ahora la media y desviación típica para cada grupo:
+```{r}
+aggregate(valores~farmacos, data = estudio, FUN = mean)
+```
+
+```{r}
+aggregate(valores~farmacos, data = estudio, FUN = sd)
+```
+
+Representamos gráficamente los valores de los distintos tipos de fármaco mediante un diagrama de cajas:
+```{r}
+boxplot(valores~farmacos, data = estudio)
+```
+
+En el diagrama de cajas observamos visualmente una gran variación entre los valores de cada tipo de tratamiento, siendo los tratamientos A y B los que más se acercan entre ellos, y el tratamiento AB el que más se asemeja al tratamiento placebo P.
+
+Debido a la baja cantidad de resultados las medias varían significativamente entre todos los tratamientos, aunque los tratamientos con A y con B tienen una media y desviación estándar similar entre ellos.  
+
+Para observar si las diferencias entre tratamientos son significativas, podemos realizar un test ANOVA. Para ello, debemos comprobar que se cumplen varias condiciones.   
+Una de las condiciones es que todos los grupos deben seguir una distribución normal, por lo que vamos a investigar esto en nuestros distintos fármacos:
+
+```{r}
+par(mfrow= c(2,2))
+qqnorm(subset(estudio$values,estudio$ind=="P"), main = "P")
+qqline(subset(estudio$values,estudio$ind=="P"))
+
+qqnorm(subset(estudio$values,estudio$ind=="A"), main = "A")
+qqline(subset(estudio$values,estudio$ind=="A"))
+
+qqnorm(subset(estudio$values,estudio$ind=="B"), main = "B")
+qqline(subset(estudio$values,estudio$ind=="B"))
+
+qqnorm(subset(estudio$values,estudio$ind=="AB"), main = "AB")
+qqline(subset(estudio$values,estudio$ind=="AB"))
+```
+
+Con estos gráficos de los cuantiles observamos que todos los grupos parecen seguir una distribución normal. Para asegurarmos hacemos un test para determinar la normalidad de la distribución. Al tener menos de 50 observaciones aplicaremos el test *Shapiro-Wilk* ubicado en el paquete nortest:
+
+```{r}
+require(nortest)
+by(data = estudio, INDICES = estudio$ind, FUN = function(x){shapiro.test(x$values)})
+```
+
+Observamos que cada grupo obtiene en el test un valor de p superior a 0.05, indicando que la hipótesis nula es correcta. Como la hipótesis nula de este test es que sí que hay normalidad en el grupo, podemos asegurar que en los cuatro grupos estudiados se sigue una distribución normal (siendo el grupo del fármaco A el que menos certeza hay que se distribuya normalmente debido a un p valor cercano a 0.05).   
+Otra suposición para poder realizar un test ANOVA es que los grupos deben tener una varianza común. Para ello, realizamos un test en estos grupos. Al saber que tratamos con grupos que siguen una distribución normal, podemos utilizar el *test de Bartlett*:
+
+```{r}
+bartlett.test(estudio$values,estudio$ind)
+```
+El *test de Bartlett* nos indica que la varianza es constante entre los grupos, ya que el valor de p es mayor a 0.05, aceptando la hipótesis nula (la hipótesis nula es que la varianza entre grupos es homogénea).   
+
+Al cumplirse las suposiciones necesarias, podemos realizar el test ANOVA entre el placebo y los distintos fármacos. Realizamos el test ANOVA:
+```{r}
+anova_farmacos<-aov(estudio$values~estudio$ind)
+summary(anova_farmacos)
+```
+Como tenemos como hipótesis nula que no hay diferencias entre las medias de los grupos, y el valor de p es inferior a 0.05, (teniendo en cuenta que la hipótesis nula se confirma cuando p>0.05) el test nos confirma entonces que debemos descartar la hipótesis nula y seguir la alternativa, es decir, podemos asegurar entonces que sí hay diferencia entre los tratamientos.
+
+
+#### b) Si la respuesta a la pregunta 1 es afirmativa realiza comparaciones de cada tratamiento con el placebo y determina si algún tratamiento difiere significativamente del placebo.   
+
+Como ya hemos confirmado la pregunta 1, ahora compararemos las diferencias entre el placebo con los otros tratamientos mediante esl *test de Tukey*:
+```{r}
+TukeyHSD(anova_farmacos)
+```
+Observando los valores ajustados de p para cada comparación podemos determinar que fármacos difieren significativamente del placebo (P), es decir, que variables rechazan la hipótesis nula de que no hay diferencia entre los dos tratamientos.Los valores de p que tienen un valor menor a 0.05 (este valor se encuentra en "p adj") son la comparación entre P y el fármaco A y entre P y el fármaco B, indicando que existen diferencias significativas entre el placebo y estos fármacos (A y B). En cambio, el fármaco AB tiene un p valor superior a 0.05 y, por lo tanto, implica que se acepta la hipótesis nula y por lo tanto no hay diferencias significativas entre este fármaco y el placebo.
+
+
+
+#### c) ¿Se cumplen suposiciones necesarias para poder realizar un test ANOVA?    
+
+Como ya hemos comentado en el apartado A, en estos datos se cumplen las suposiciones para poder realizar un test ANOVA (grupos normalmente distribuido y con varianzas constantes entre grupos).
+
+#### d) ¿Podrías hacer este ejercicio con RCommander? En caso afirmativo, explica los pasos que tendrías que hacer para realizar el ejercicio con RCommander.
+
+Para realizar el ejercicio en RCommander, primero debemos instalar y utilizar el paquete 'rcmdr'. A partir de la nueva interfaz, debemos importar la tabla de datos creada anteriormente llamada "estudio":
+```{r}
+require(Rcmdr)
+```
+
+Cuando tenemos como conjunto de datos activo la variable estudio que contiene los 40 valores y los 4 grupos marcados como factores (variable categórica) podemos empezar a realizar el ejercicio.   
+Para observar el diagrama de cajas vamos a Gráficas<Diagrama de caja... y seleccionamos que queremos realizar el diagrama separado por grupos, obteniendo este código:   
+```{r}
+Boxplot(values ~ ind, data = estudio, id = list(method = "y"))
+```
+
+Para obtener las gráficas de los cuartiles de cada grupo para observar la normalidad de los valores, vamos a Gráficas<Gráfica de comparación de cuartiles... y seleccionamos que queremos realizar la gráfica por grupos del conjunto de datos activo. Esto resulta en la obtención de este código:  
+
+```{r}
+with(estudio, qqPlot(values, dist = "norm", id = list(method = "y", n = 2, labels = rownames(estudio)), 
+    groups = ind))
+```
+
+Para comprobar la normalidad de los grupos nos dirigimos a la pestaña Estadísticos<resumenes<Test de Normalidad. En la nueva pestaña elegimos "Test por grupos" y elegimos el test Shapiro-Francia. Esto nos da esta línea de código:
+
+```{r}
+normalityTest(values ~ ind, test = "shapiro.test", data = estudio)
+```
+
+Observamos que los resultados obtenidos son los mismos a los realizados en el anterior ejercicio.   
+
+Ahora investigamos si la varianza entre grupos es constante, y para ello utilizamos el *test de Bartlett*. En RCommander debemos ir a Estadísticos<Varianzas<Test de Bartlett y aceptar cuando las variables estén donde corresponden. Esto nos genera este código:
+
+```{r}
+with(estudio, tapply(values, ind, var, na.rm = TRUE))
+bartlett.test(values ~ ind, data = estudio)
+```
+Obtenemos así el mismo resultado que en el ejercicio anterior (la varianza es constante entre grupos).   
+
+Ahora realizamos el test ANOVA para comprobar la diferencia de medias entre distintos grupos. Para ello vamos a Estadísticos<Medias<ANOVA de un factor. Introducimos el nombre del test que elijamos (en nuestro caso "anova_farmacos_rcmdr") y ejecutamos el código administrado:
+```{r}
+anova_farmacos_rcmdr <- aov(values ~ ind, data = estudio)
+summary(anova_farmacos_rcmdr)
+with(estudio, numSummary(values, groups = ind, statistics = c("mean", "sd")))
+```
+Obtenemos el mismo valor que en el ejercicio anterior, aunque además muestra la media y desviación estándar de cada grupo.   
+
+Si además queremos observar si hay diferencias entre medias en los distintos grupos, podemos marcar la casilla "Comparaciones dos a dos de las medias" en la misma ventana de creación del test ANOVA a la que hemos accedido anteriormente. De esta manera obtenemos este código este código requiere del paquete "multcomp" activado):
+```{r}
+require(multcomp)
+```
+
+
+```{r}
+AnovaModel.6 <- aov(values ~ ind, data = estudio)
+summary(AnovaModel.6)
+with(estudio, numSummary(values, groups = ind, statistics = c("mean", "sd")))
+local({
+    .Pairs <- glht(AnovaModel.6, linfct = mcp(ind = "Tukey"))
+    print(summary(.Pairs))  # pairwise tests
+    print(confint(.Pairs))  # confidence intervals
+    print(cld(.Pairs))  # compact letter display
+    old.oma <- par(oma = c(0, 5, 0, 0))
+    plot(confint(.Pairs))
+    par(old.oma)
+})
+```
+
+Encontramos que seleccionando esa casilla, realiza automáticamente el *test Tukey* obteniendo los mismos resultados que en el ejercicio anterior. Además, también realiza automáticamente el nivel de confidencia "family-wise", el cual nos indica la diferencia de las medias de cada par de grupos. Aqui podemos observar visualmente los grupos con evidencia de que sus medias son diferentes entre ellas (la diferencia de sus valores no se encuentra dentro del intervalo de confianza en el valor 0, que indicaria que su no diferencia). De esta manera, confirmamos que los fármacos A y B difieren significativamente del placebo con un 95% de confidencia.
