@@ -1,0 +1,442 @@
+---
+title: "SAD_PEC_1"
+author: "Marc Bañuls Tornero"
+date: "8/10/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Ejercicio 1
+
+### 1.1. Importad los datos del fichero lung_cancer_examples.csv correspondientes a la probabilidad de que un paciente tenga cáncer de pulmón a partir del estudio de algunos parámetros. Guardad estos datos en un data frame llamado dataLungCancer y mostrad los primeros y últimos registros de este conjunto de datos.
+
+```{r 1.1.}
+dataLungCancer<-read.csv("lung_cancer_examples.csv") # Importamos los datos del archivo
+class(dataLungCancer) 
+# Observamos que los datos importados ya se encuentran en formato data frame
+```
+
+```{r 1.1.1}
+# Mostramos los primeros registros del conjunto de datos:
+head(dataLungCancer)
+
+# Mostramos los últimos registros del conjunto de datos:
+tail(dataLungCancer)
+```
+
+### 1.2.A partir del data frame definido, dataLungCancer, mostrad algunas características como:
+
+#### a) Nombre de las variables que forman el conjunto de datos:
+
+```{r 1.2.a}
+names(dataLungCancer)
+```
+
+#### b) Estrucura del conjunto de datos, es decir, tipo de variables:
+
+```{r 1.2.b}
+str(dataLungCancer)
+```
+
+#### c) Tamaño de la muestra y número de variables
+
+```{r 1.2.c}
+# Tamaño de la muestra y número de variables del conjunto de datos:
+dim(dataLungCancer)
+# El primer valor es el tamaño de la muestra y el segundo valor el número de variables del conjunto de datos
+```
+
+#### d) ¿Existen valores nulos en el conjunto de datos? ¿Y en la variable Result?
+
+```{r 1.2.d}
+table(is.null(dataLungCancer))
+# En el conjunto de datos no existen valores nulos
+
+table(is.null(dataLungCancer$Result))
+# Especificamente en la variable Result no existen valores nulos
+```
+
+#### e) ¿Existen datos perdidos (missing values) en la tabla?
+
+```{r 1.2.e}
+table(is.na(dataLungCancer))
+# El resultado indica que no existen datos perdidos en el conjunto de datos
+```
+
+### 1.3. Exportad el data frame dataLungCancer a un fichero en formato texto. Explicad cómo se realizaría con RStudio y con RCommander.
+
+Para exportar el data frame mediante RStudio ejecutamos el comando "write.table()". Dentro del paréntesis del comando introducimos el data frame a exportar (dataLungCancer) y posteriormente introducimos la ubicación y nombre del nuevo archivo exportado:
+```{r 1.3. exportar en RStudio}
+write.table(dataLungCancer,"/UOC_R_Working_Directory/SAD_PEC_1/dataLungCancer.txt")
+```
+
+Para exportar el data frame en formato .txt mediante RCommander hay que considerar que el data frame "lung_cancer_examples.csv" debe haber sido importado a R Commander previamente.   
+
+Para importar nuestro archivo .csv a R Commander accedemos a Datos > Importar datos > desde archivo de texto, portapapeles o URL... En esta ventana introducimos el nombre que queramos para nuestro dataset, seleccionamos los parámetros teniendo en cuenta que nuestro archivo usa como separador de campos las comas y aceptamos.   
+R Commander debería realizar este script:
+``dataLungCancer <- read.table("D:/UOC_R_Working_Directory/SAD_PEC_1/lung_cancer_examples.csv", header = TRUE, sep = ",", na.strings = "NA", dec = ".", strip.white = TRUE)``
+
+
+Ahora para exportar el dataset importado a R Commander, accedemos a Datos > Conjunto de datos activo > Exportar el conjunto de datos activo...   
+En esta nueva ventana elegimos los parámetros deseados de exportación y pulsamos en aceptar, generándonos automáticamente el script:
+
+``write.table(dataLungCancer,"D:/UOC_R_Working_Directory/SAD_PEC_1/dataLungCancer.txt", sep = ",", col.names = TRUE, row.names = TRUE, quote = TRUE, na = "NA")``
+
+## Ejercicio 2
+
+### 2.1.Instalad el paquete *survival* de RStudio, cargad el conjunto de datos *lung* y guardadlo en un data frame llamado *dataLungCSurv*. Posteriormente, mostrad los primeros y últimos registros, así como el nombre de las variables, la estructura del conjunto de datos y el número de registros.
+`` install.packages("survival")`` Instalación del paquete *survival*
+
+```{r 2.1.}
+require(survival) # Carga del paquete survival
+dataLungCSurv<-lung # Conjunto de datos "lung" guardado en el data frame "dataLungCSurv"
+head(dataLungCSurv) # Primeros registros del data frame
+tail(dataLungCSurv) # Últimos registros del data frame
+names(dataLungCSurv) # Nombre de las variables del data frame
+str(dataLungCSurv) # Estructura del conjunto de datos
+dim(dataLungCSurv) # Número de registros (primer valor) y número de variables (segundo valor) 
+```
+
+### 2.2. Definid un data frame, dataLungCSurv_w, y otro data frame,dataLungCSurv_m, que corresponderán a los conjuntos de datos de las mujeres y de los hombres, respectivamente. Posteriormente, exportad ambos data frame a dos ficheros (LungCSurv_w,LungCSurv_m) de tipo csv.
+
+Ejecutando el comando ``help("lung")`` observamos que el género está indicado con un 1 para hombre y un 2 para mujer
+
+```{r 2.2.}
+dataLungCSurv_w <-subset(dataLungCSurv, dataLungCSurv$sex == 2) # Seleccionamos el subset del data frame donde el sexo del individuo sea 2, es decir, mujer
+dataLungCSurv_m <-subset(dataLungCSurv, dataLungCSurv$sex == 1) # Seleccionamos el subset del data frame donde el sexo del individuo sea 1, es decir, hombre
+write.csv(dataLungCSurv_w, "D:/UOC_R_Working_Directory/SAD_PEC_1/LungCSurv_w.csv") 
+write.csv(dataLungCSurv_m, "D:/UOC_R_Working_Directory/SAD_PEC_1/LungCSurv_m.csv")
+# Exportamos ambos data frames recién creados en formato csv ejecutando un comando similar al del ejercicio 1.3
+# Se pueden modificar los parámetros de los dataframes para exportar como csv (separador de decimales, delimitadores... ) pero como no se han especificado hacemos las exportaciones en el formato estándar de RStudio.
+
+```
+
+## Ejercicio 3
+
+### 3.1. A partir del conjunto de datos correspondientes al data frame dataLungCancer, se pide:
+
+#### a) ¿Cuál es la media de edad, que definiremos como age_mean, de los pacientes de la muestra de datos?
+
+```{r 3.1.a}
+age_mean<-mean(dataLungCancer$Age) #Mostramos la edad media del data frame
+age_mean
+```
+
+#### b) Definid una variable, age_max_smoke, que guarde la edad del paciente que registra el máximo valor de cigarros fumados por día
+
+```{r 3.1.b}
+age_max_smoke<-subset(dataLungCancer$Age, dataLungCancer$Smokes == max(dataLungCancer$Smokes)) 
+age_max_smoke
+
+```
+
+#### c) Mostrad los diagnósticos resultantes (Result=1 (afectado), Result=0 (no afectado)) de aquellos pacientes que superan la media de cantidad de cigarros fumados y de tomas de alcohol.
+
+
+
+```{r 3.1.c1}
+dataLung_abovemean<- subset(dataLungCancer$Result, dataLungCancer$Alkhol> mean(dataLungCancer$Alkhol) & dataLungCancer$Smokes > mean(dataLungCancer$Smokes)) # Obtenemos los diagnósticos de los pacientes que superan la cantidad media de tomas de alcohol y de cigarrillos. Para visualizar mejor el resultado ponemos los datos en una tabla. En la tabla observamos que de 18 pacientes que superan la media de tomas de alcohol y cigarrillos, 17 están afectados y 1 no:
+table(dataLung_abovemean)
+```
+
+#### d) Definid un data frame, *paciente_result_0*, que contenga los pacientes que no están afectados (Result=0). A partir de este data frame, definid un vector que contenga los valores máximos de las variables Age, Smokes, AreaQ, y Alkhol.
+
+```{r 3.1.d}
+# Definimos el data frame con los pacientes no afectados
+paciente_result_0 <- subset(dataLungCancer, dataLungCancer$Result == 0)
+# Definimos un vector con los valores máximos de Age, Smokes, AreaQ y Alkhol respectivamente
+paciente_max<- c(max(paciente_result_0$Age), max(paciente_result_0$Smokes), max(paciente_result_0$AreaQ), max(paciente_result_0$Alkhol))
+# Observamos los datos obtenidos en este nuevo vector
+paciente_max
+```
+
+### 3.2.A partir del conjunto de datos correspondientes al data frame dataLungCSurv, se pide:
+
+#### a) Definid una matriz que muestre las columnas sex y age
+
+```{r 3.2.a }
+# Definimos la matriz en una nueva variable (SurvMatrix) que muestra respectivamente las columnas "sex" y "age"
+SurvMatrix<-matrix(c(dataLungCSurv$sex, dataLungCSurv$age), ncol = 2)
+head(SurvMatrix)
+```
+
+#### b) Mostrad los datos de los hombres (sex=1) del conjunto de datos que fallecieron (status=2)
+
+```{r 3.2.b}
+# Definimos una variable (deceased_m) que muestra el data frame con datos de solo hombres (variable creada en el ejercicio 2.2) y definimos que se muestren solo los pacientes que fallecieron:
+
+deceased_m<-subset(dataLungCSurv_m, dataLungCSurv_m$status == 2)
+head(deceased_m)
+```
+
+#### c) En base a los resultados del apartado anterior, de los hombres que fallecieron, comprobad si el paciente que registraba mayor pérdida de peso poseía también un valor de ph.ecog superior a 3. Tened en cuenta que, en el caso de la variable wt.loss aparecen missing values que se aconseja eliminar para realizar cálculos
+
+```{r 3.2.c}
+# Eliminamos todos los missing values del data frame donde vamos a realizar los cálculos
+complete_deceased_m<-na.omit(deceased_m)
+# Creamos una nueva variable que recoge el paciente fallecido con mayor pérdida de peso poniendole como condición que su ph.ecog sea mayor a 3.
+paciente_mayor_peso_ecog<-subset(max(complete_deceased_m$wt.loss), complete_deceased_m$ph.ecog > 3)
+# Observamos el resultado obtenido
+paciente_mayor_peso_ecog
+# Como no se observa ningún valor resultante, podemos concluir que el paciente con mayor pérdida de peso no tenía un ph.ecog superior a 3. Para observar el valor que tiene:
+paciente_mayor_peso<-subset(complete_deceased_m, complete_deceased_m$wt.loss == max(complete_deceased_m$wt.loss))
+paciente_mayor_peso
+# En estos datos del paciente con mayor pérdida de peso observamos que su ph.ecog es de 1, verificando el resultado anterior.
+```
+
+## Ejercicio 4
+
+### 4.1.Realizad un resumen estadístico de dataLungCancer que muestre los parámetros básicos más importantes.
+
+```{r 4.1.}
+# Mostramos el resumen del análisis estadístico
+summary(dataLungCancer)
+```
+
+En RCommander importamos dataLungCancer y el comando que te da a ejecutar es el mismo: ``summary(dataLungCancer)``
+
+### 4.2. Definid un vector con las edades (Age) de los pacientes y otro vector con el resultado (Result) del diagnóstico. Etiquetad la variable Result con “Afectado” si el valor es 1 y “No afectado” si el valor es 0.
+
+```{r 4.2.}
+#Definimos el vector de edad:
+dataLungCancer_Age<-dataLungCancer$Age
+#Definimos y etiquetamos el vector :
+dataLungCancer_Result<-factor(dataLungCancer$Result, levels = c(0,1), labels = c("No afectado", "Afectado"))
+head(dataLungCancer_Result)
+
+```
+
+### 4.3. A partir del vector de las edades, ordenad el vector, calcular la media y la varianza y desviación estándar.
+
+```{r 4.3.}
+#Ordenamos el vector:
+sort(dataLungCancer_Age)
+
+#Calculamos la media del vector:
+mean(dataLungCancer_Age)
+
+#Calculamos la varianza del vector:
+var(dataLungCancer_Age)
+
+#Calculamos la desviación estándar del vector:
+sd(dataLungCancer_Age)
+```
+Estos valores indican que los datos del vector son muy variables, ya que hay una gran varianza y desviación estándar de este vector.   
+
+
+### 4.4. Mostrad las tablas de frecuencias relativas y absolutas de los vectores definidos al apartado 4.2. Posteriormente representad una tabla de frecuencias relativas cruzadas, de manera que podamos visualizar cuántos pacientes según edad, estan o no afectados.
+
+```{r 4.4.}
+#Tablas de frecuencias relativas:
+prop.table(table(dataLungCancer_Age))
+prop.table(table(dataLungCancer_Result))
+
+#Tablas de frecuencias absolutas:
+table(dataLungCancer_Age)
+table(dataLungCancer_Result)
+
+#Tabla de frecuencias relativas cruzadas
+prop.table(table(dataLungCancer_Age,dataLungCancer_Result))
+```
+
+Visualizando las tablas nos encontramos que hay valores muy dispersos y en poca cantidad de edades, siendo el mayor número de personas con la misma edad los 62 años. También observamos que hay casi la misma cantidad de personas no afectadas que afectadas de cáncer, pero cabe destacar que la mayor cantidad de aparición de cáncer se encuentra en las personas de mayor edad. También se observa una acumulación de personas de baja edad que no tienen cáncer (estas dos relaciones se pueden observar en la tabla de frecuencias relativas cruzadas).   
+
+### 4.5 Realizad los siguientes gráficos:
+
+#### a) Diagrama de tallo y hojas de la variable age
+```{r 4.5.a}
+stem(dataLungCancer$Age)
+```
+
+En RCommander el script es:
+
+
+``library(aplpack, pos = 34) with(dataLungCancer, stem.leaf(Age, style = "bare", na.rm = TRUE))``
+
+
+#### b) Diagrama de cajas y bigotes de la variable smoke
+
+```{r 4.5.b}
+boxplot(dataLungCancer$Smokes,main = "Diagrama de cajas de cigarrillos por día",ylab = "Cigarrillos tomados",col = "yellow")
+```
+
+En RCommander el script sería:
+``Boxplot(~Smokes, data = dataLungCancer, id = list(method = "y"), ylab = "Cigarrillos tomados", main = "Diagrama de cajas de cigarrillos por dia")``
+
+
+El diagrama de cajas nos indica que la mediana de cigarrillos por día se encuentra en las 15 unidades y sus cuartiles 1 y 3 se encuentran en las 10 y 20 unidades respectivamente. También se encuentran más valores fuera de los cuartiles 1 y 3 pero de manera mucho menos propensa, rondando entre ningún cigarrillo o hasta más de 30.   
+
+
+#### c) Histograma de la variable Alkhol
+```{r 4.5.c}
+hist(dataLungCancer$Alkhol, main = "Histograma de tomas de Alcohol",xlab = "Número de tomas",ylab = "Total individuos",col = "Orange")
+```
+   
+   
+En RCommander el script sería:   
+
+``with(dataLungCancer, Hist(Alkhol, scale = "frequency", breaks = "Sturges", col = "darkgray", xlab = "Número de tomas", ylab = "Total individuos", main = "Histograma de tomas de Alcohol"))``   
+
+
+En este diagrama de barras visualizamos la cantidad de tomas de alcohol y el total de individuos que toman esa cantidad de alcohol determinada. Sabiendo esto observamos que la mayoría de individuos no toman o toman muy pocas cantidades de alcohol al día, siendo una relación casi inversamente proporcional entre la cantidad de tomas y el número de individuos.
+
+#### d) Diagrama de puntos de la variable Alkhol
+```{r 4.5.d}
+plot(dataLungCancer$Alkhol, main = "Diagrama de puntos de tomas de Alcohol", xlab="Total", ylab = "Tomas de Alcohol", col="red")
+```
+
+En RCommander el script sería:   
+
+``stripchart(dataLungCancer$Alkhol, method = "stack", xlab = "Total", ylab = "Tomas de alcohol", main = "Diagrama de puntos de tomas de alcohol")``   
+
+
+En este diagrama de puntos visualizamos los mismos valores que en el diagrama de barras anterior, pero aquí se encuentran representados individualmente desde el individuo 1 al 60. Aquí también se observa una elevada cantidad de personas que no toman o toman muy poco alcohol. Cabe destacar que el rango de tomas con menor número de individuos es de 6-7, ya que curiosamente hay una significativa cantidad de individuos (5) que toman 8 unidades de alcohol al día.
+
+#### e) Combinad los anteriores gráficos en una representación gráfica común. Podéis utilizar la función layout() para ajustar la distribución de los gráficos
+
+
+```{r}
+stem(dataLungCancer$Age)
+layout(mat =matrix(c(1,2,3,3), 2, 2, byrow = TRUE))
+
+boxplot(dataLungCancer$Smokes,main = "Diagrama de cajas de cigarrillos por día",ylab = "Cigarrillos tomados",col = "yellow")
+
+hist(dataLungCancer$Alkhol, main = "Histograma de tomas de Alcohol",xlab = "Número de tomas",ylab = "Total individuos",col = "Orange")
+
+plot(dataLungCancer$Alkhol, main = "Diagrama de puntos de tomas de Alcohol", xlab="Total", ylab = "Tomas de Alcohol", col="red")
+```
+
+## Ejercicio 5
+
+### A partir del data frame dataLungCsurv y utilizando el paquete de gráficos ggplot2, se pide resolver las siguientes cuestiones:
+
+#### a) Realizad un gráfico de tipo qplot de la variable age y la variable wt.loss
+
+```{r 5.a}
+#Cargamos el paquete ggplot2
+library(ggplot2)
+#Realizamos un gráfico qplot
+qplot(dataLungCSurv$age, dataLungCSurv$wt.loss, data = dataLungCSurv, xlab = "Edad",ylab = "Pérdida de peso")+
+  labs(title="Relación entre edad y pérdida de peso")
+#Había filas con missing values pero éstas se han eliminado automáticamente, así que no se requiere mayor tratamiento de los datos.
+
+```
+En este diagrama de puntos visualizamos la relación entre la edad y la pérdida de peso (en 6 meses) de los individuos. Observamos que la mayor pérdida de peso se encuentra en individuos de entre 50 y 60 años (más de 50kg), aunque la mayoría de los individuos pierden sobre unos 20-25kg.
+
+#### b) Realizad un gráfico de barras para las dos variables age y status
+
+```{r 5.b} 
+# Juntamos las dos variables para hacer el gráfico:
+ggplot(data=dataLungCSurv, aes(age,status))+
+  geom_col(col= "black", fill= "brown")
+```
+
+En este gráfico de barras observamos el estado de los individuos respecto a su edad.
+
+##Ejercicio 6
+
+### A partir del conjunto de datos dataLungCancer, realizad un breve estudio de regresión y correlación lineal, resolviendo las siguientes cuestiones:
+
+#### a) Realizad un diagrama de cajas sobre las variables Alkhol y Age. ¿Qué se intuye de este gráfico?
+```{r 6.a.}
+layout(mat=matrix(c(1,2), 2, 2, byrow = TRUE), c(2,2), c(2,2))
+boxplot(dataLungCancer$Alkhol, main="Variable Alkhol", ylab="Número de tomas de alcohol", col = "green")
+boxplot(dataLungCancer$Age,main="Variable Age", ylab="Edad(años)", col = "blue")
+```
+El diagrama de cajas y bigotes nos indica que entre todos los pacientes ha variado poco el número de tomas de alcohol encontrandose los percentiles entre 1 y 5 tomas de alcohol al dia, aunque se encuentran valores máximos de 8 tomas y mínimos de ninguna.   
+
+Respecto a la edad, observamos que la mediana de la edad de los pacientes se encuentra en los 40 años, variando la mayoría de los pacientes entre los 30-55 años, pero existiendo como mínimo un paciente con menos de 20 años y como máximo de más de 70 años.   
+
+
+#### b) Realizad un modelo de regresión para las dos variables anteriores y un diagrama de puntos que ajuste al modelo anterior. ¿Qué conclusiones obtenéis?
+
+Contamos con que la variable explicativa son las tomas de alcohol y la explicada la edad.
+```{r 6.b.1.}
+modelo<- lm(dataLungCancer$Age ~ dataLungCancer$Alkhol)
+summary(modelo)
+```
+
+```{r 6.b.2.}
+plot(dataLungCancer$Age, dataLungCancer$Alkhol, xlab="Edad", ylab="Alcohol")
+abline(modelo)
+```
+
+Observando los valores estadísticos del modelo de regresión, con una R cuadrada muy baja indicando que el modelo no ajusta bien a los datos y unos residuos muy por encima o debajo de la mediana. Así que en principio el modelo de regresión lineal no se ajusta a estos datos. Posteriormente observando el diagrama de dispersión, no parece que haya una tendencia o correlación visible entre la edad y las tomas de alcohol. Sí que parece que haya un leve aumento de tomas de alcohol a los 60-70 años respecto a los 20-40, pero faltarían más datos en el estudio para que hubiera una dependencia significativa.
+
+#### c) Realizad la matriz de correlación del conjunto de datos dataLungCancer. ¿Qué podéis afirmar?
+
+```{r 6.c.}
+cor(dataLungCancer)
+```
+
+Visualizando la matriz de correlación de Pearson, podemos afirmar que hay poca correlación entre las variables Age y Alkhol, pero sí hay una alta correlación entre la variable Result y Alkhol. También encontramos que hay una elevada correlación negativa entre las variables Alkhol y AreaQ.
+
+#### d) Calculad los residuos del modelo ajustado anterior y realizad un gráfico de normalidad.
+
+```{r 6.d.}
+residuos<-rstandard(modelo)#residuos estándares del modelo ajustado
+par(mfrow=c(1,3))
+
+hist(residuos)
+
+boxplot(residuos)
+
+qqnorm(residuos)
+qqline(residuos)
+```
+
+#### e) De los apartado anteriores, ¿Qué podéis concluir?
+De los apartados anteriores concluimos que no hay una correlación significativa entre la edad y las tomas de alcohol en los datos analizados. Esto se ha demostrado buscando la correlación entre estas dos variables y realizando un análisis de regresión, los cuales han reforzado la hipótesis de no correlación.   
+En el último apartado donde calculamos los residuos del modelo de regresión, hacemos unos gráficos de normalidad de estos residuos. Éstos nos indicas que este modelo sí parece seguir una distribución normal. Podemos observar que el histograma tiene la típica forma de una distribución normal, el diagrama de cajas tiene todos los valores cercanos a 0 y el diagrama de puntos siguen de manera bastante exacta la línea del modelo.
+
+## Ejercicio 7
+
+### A partir del paquete *MASS* de RStudio, seleccionamos el conjunto de datos *Melanoma*. Desde la pestaña Package de RStudio, se puede acceder al contenido del paquete *MASS* y, por tanto, a la descripción de cada conjunto de datos. Se pide:
+
+#### a) ¿Cuántos hombres y cuántas mujeres han realizado las pruebas?
+
+Observamos que los hombres se encuentran definidos con el valor 1 y las mujeres con el valor 0 en la variable "sex". A partir de esto podemos realizar una instrucción condicional para contar las mujeres y otra para los hombres:
+```{r 7.a.1.}
+require(MASS)
+data("Melanoma")
+sex<-c(Melanoma$sex)
+
+mujer<-0
+for(i in 1:length(sex))
+  if(sex[i]==0)
+    mujer<-mujer+1
+print(mujer)
+
+```
+```{r 7.a.2.}
+hombre<-0
+for(i in 1:length(sex))
+  if(sex[i]==1)
+    hombre<-hombre+1
+print(hombre)
+```
+
+#### b) ¿Cuál es la media de edades de aquellos pacientes que murieron por melanoma?
+
+Observamos que en la información del paquete la variabla "status" tiene como valor 1 a los pacientes que murieron debido a un melanoma.
+```{r 7.b.}
+status<-c(Melanoma$status)
+age<-c(Melanoma$age)
+deceased_age<-(NULL)
+for(i in 1:length(status))
+  if(status[i]==1)
+    deceased_age<-c(deceased_age,age[i])
+print(mean(deceased_age))
+
+```
+
+
+
+
+
